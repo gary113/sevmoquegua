@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import com.gary.sevmoquegua.clases.Medida
 import kotlinx.android.synthetic.main.activity_llenar_datos.*
+import kotlinx.android.synthetic.main.activity_llenar_datos.bAgregar
 
 class LlenarDatosActivity : AppCompatActivity() {
 

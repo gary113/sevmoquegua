@@ -1,5 +1,6 @@
 package com.gary.sevmoquegua
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.gary.sevmoquegua.clases.PuntoMedida
@@ -7,7 +8,6 @@ import com.jjoe64.graphview.DefaultLabelFormatter
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_grafico.*
-import java.lang.Float
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
@@ -18,69 +18,56 @@ class GraficoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_grafico)
 
-
-        /*
         val listaPuntos = intent.getParcelableArrayListExtra<PuntoMedida>("listaPuntos")
+        val listaTendencia = intent.getParcelableArrayListExtra<PuntoMedida>("listaTendencia")
 
-        val puntos = ArrayList<Entry>()
-
-        for (punto in listaPuntos!!){
-            puntos.add(Entry(punto.ab2.toFloat(), punto.rho.toFloat()))
+        for (i in 0 until listaTendencia!!.size){
+            if (listaTendencia[i].rho<=0 && i>0){
+                listaTendencia[i].rho=listaTendencia[i-1].rho
+            }
         }
 
-        val dataset = LineDataSet(puntos,"Medidas")
-
-        val lineData = LineData(dataset)
-
-        chGrafico.setScaleEnabled(false)
-        chGrafico.data=lineData
-        chGrafico.description.isEnabled=false
-        chGrafico.axisRight.isEnabled = false;
-        chGrafico.axisLeft.isGranularityEnabled=true
-        chGrafico.axisLeft.granularity=100f
-
-        chGrafico.invalidate()
-
-         */
-
-        val listaPuntos = intent.getParcelableArrayListExtra<PuntoMedida>("listaPuntos")
-
-        //Creates an ArrayList
         //Creates an ArrayList
         val testList: ArrayList<DataPoint> = ArrayList()
+        val testList2: ArrayList<DataPoint> = ArrayList()
 
-        //Populates the arrayList whit some values
-
-        //Populates the arrayList whit some values
-        /*
-        val value1 = log10(1.0)
-        val value2 = log10(10.0)
-        val value3 = log10(100.0)
-        val value4 = log10(1000.0)
-        val value5 = log10(10000.0)
-        testList.add(DataPoint(0.0, value1))
-        testList.add(DataPoint(1.0, value2))
-        testList.add(DataPoint(2.0, value3))
-        testList.add(DataPoint(3.0, value4))
-        testList.add(DataPoint(4.0, value5))
-
-         */
 
         for (punto in listaPuntos!!){
-            testList.add(DataPoint(punto.ab2,log10(punto.rho)))
+            testList.add(DataPoint(punto.ab2, log10(punto.rho)))
         }
 
-        //Converts ArrayList<DataPoints> to DataPoints[] array
+        for (tendencia in listaTendencia){
+            testList2.add(DataPoint(tendencia.ab2, log10(tendencia.rho)))
+        }
+
 
         //Converts ArrayList<DataPoints> to DataPoints[] array
-        var test: Array<DataPoint?>? = arrayOfNulls(testList.size)
-        test = testList.toArray(test!!)
+        var test: Array<DataPoint?> = arrayOfNulls(testList.size)
+        test = testList.toArray(test)
+
+        var test2: Array<DataPoint?> = arrayOfNulls(testList2.size)
+        test2 = testList2.toArray(test2)
 
         //Adds the dataPoint array to the graph
 
         //Adds the dataPoint array to the graph
         val seriesLine = LineGraphSeries(test)
+        seriesLine.title="Datos"
+        seriesLine.color= Color.WHITE
+        seriesLine.thickness=2
+        seriesLine.isDrawDataPoints=true
+        seriesLine.dataPointsRadius=10f
+        //seriesLine.setAnimated(true)
         grafico.addSeries(seriesLine)
+
+        grafico.isCursorMode=true
+
+        val seriesLine2 = LineGraphSeries(test2)
+        seriesLine2.color= Color.YELLOW
+        seriesLine2.title="Tendencia"
+        //seriesLine2.setAnimated(true)
+        seriesLine2.thickness=15
+        grafico.addSeries(seriesLine2)
 
         //Defines graph structure
         grafico.viewport.isYAxisBoundsManual = true
@@ -91,17 +78,23 @@ class GraficoActivity : AppCompatActivity() {
         grafico.viewport.setMinX(0.0)
         grafico.viewport.setMaxX(50.0)
 
-        grafico.legendRenderer.isVisible = true
+        //grafico.legendRenderer.isVisible = true
+
+        grafico.gridLabelRenderer.horizontalAxisTitle="AB/2 mts"
+        grafico.gridLabelRenderer.verticalAxisTitle="Resistividad ρ Ω.m"
+        grafico.gridLabelRenderer.numHorizontalLabels=6
+        grafico.gridLabelRenderer.padding=40
+        grafico.gridLabelRenderer.gridColor=Color.RED
 
 
         grafico.gridLabelRenderer.labelFormatter = object : DefaultLabelFormatter() {
             override fun formatLabel(value: Double, isValueX: Boolean): String {
                 return if (isValueX) {
-                    super.formatLabel(value, isValueX)
+                    super.formatLabel(value, isValueX).replace(",",".")
                 } else {
-                    val yValue = super.formatLabel(value, isValueX).replace(",".toRegex(), ".")
-                    val yLogValue = floor(10.0.pow(Float.valueOf(yValue).toDouble()))
-                    if (value <= 0) "0" else yLogValue.toString()
+                    val yValue = super.formatLabel(value, isValueX).replace(",",".")
+                    val yLogValue = floor(10.0.pow(yValue.toDouble()))
+                    yLogValue.toString()
                 }
             }
         }

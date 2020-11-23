@@ -3,7 +3,7 @@ package com.gary.sevmoquegua.clases
 import android.os.Parcel
 import android.os.Parcelable
 
-data class PuntoMedida(val ab2:Double, val rho:Double):Parcelable {
+data class PuntoMedida(val ab2:Double, var rho:Double):Parcelable {
 
     constructor(parcel: Parcel) : this(
         parcel.readDouble(),
